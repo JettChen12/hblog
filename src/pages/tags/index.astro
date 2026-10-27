@@ -1,0 +1,23 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHead from '@/components/PageHead.astro';
+import TagChip from '@/components/TagChip.astro';
+import { getAllTags } from '@/lib/posts';
+
+const tags = await getAllTags();
+---
+<Base title="标签" description={`按标签浏览全部文章，共 ${tags.size} 个标签。`}>
+  <PageHead title="标签" desc={`共 ${tags.size} 个标签，按文章数排序。`} />
+  <div class="container tags-index">
+    {[...tags.entries()].map(([tag, count]) => <TagChip tag={tag} count={count} />)}
+  </div>
+</Base>
+
+<style>
+  .tags-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding-block: var(--space-md) var(--space-2xl);
+  }
+</style>

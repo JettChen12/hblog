@@ -1,0 +1,30 @@
+---
+/** 内页页头：标题 + 一句说明（标题自己宣布内容，不用眉题） */
+interface Props {
+  title: string;
+  desc?: string;
+}
+const { title, desc } = Astro.props;
+---
+<header class="page-head">
+  <div class="container">
+    <h1 class="page-head-title px">{title}</h1>
+    {desc && <p class="page-head-desc">{desc}</p>}
+  </div>
+</header>
+
+<style>
+  .page-head { padding-block: var(--space-2xl) var(--space-xl); }
+  .page-head-title {
+    font-size: var(--px-36);
+    line-height: 1.4;
+    padding-bottom: var(--space-sm);
+    border-bottom: var(--border-pixel) solid var(--color-rule-strong);
+  }
+  .page-head-desc {
+    margin-top: var(--space-md);
+    color: var(--color-ink-2);
+    font-size: var(--text-md);
+    max-width: 60ch;
+  }
+</style>

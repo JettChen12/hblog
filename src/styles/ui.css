@@ -1,0 +1,141 @@
+/* H-BLOG 共享 UI 原语：按钮 / 徽章 / 代码块框 / 搜索对话框 / 入场揭示 */
+
+/* —— 按钮 —— */
+/* 主按钮（全站唯一实心主样式）：珊瑚填充 + 像素硬投影，位移全部走 transform */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  min-height: 48px; padding: var(--space-xs) var(--space-lg);
+  border: var(--border-pixel) solid var(--color-ink);
+  background: var(--color-accent); color: var(--color-accent-ink);
+  font-family: var(--font-display); font-size: var(--px-12); line-height: 1.6;
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+  box-shadow: var(--shadow-pixel);
+  transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--color-rule-strong); }
+}
+.btn:active { transform: translate(2px, 2px); box-shadow: var(--shadow-pixel-down); }
+.btn:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+.btn[aria-disabled='true'], .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: var(--shadow-pixel); }
+
+/* 次按钮：描边静止样式 */
+.btn--quiet {
+  background: transparent; color: var(--color-ink);
+  border: var(--border-pixel) solid var(--color-rule-strong); box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--quiet:hover { background: var(--color-paper-2); transform: none; box-shadow: none; }
+}
+.btn--quiet:active { transform: scale(0.97); }
+
+/* 图标按钮（导航 / 复制） */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; padding: 0;
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  background: transparent; color: var(--color-ink); cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover { background: var(--color-paper-2); }
+}
+.icon-btn:active { transform: scale(0.94); }
+
+/* —— 徽章 / 标签 —— */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  min-height: 32px; padding: var(--space-3xs) var(--space-sm);
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  background: transparent; color: var(--color-ink-2);
+  font-family: var(--font-display); font-size: var(--px-12); line-height: 1.6;
+  text-decoration: none; white-space: nowrap;
+  transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.chip:hover { color: var(--color-accent-text); border-color: var(--color-accent); background: var(--color-accent-soft); }
+}
+.chip[aria-current='page'] { color: var(--color-accent-text); border-color: var(--color-accent); }
+
+/* —— 代码块外框（由 Post 布局的脚本包裹生成） —— */
+.code-frame { margin: var(--space-lg) 0; border: var(--border-pixel) solid var(--color-rule-strong); background: var(--color-code-bg); }
+.code-frame-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  border-bottom: var(--border-pixel) solid var(--color-rule-strong);
+  background: var(--color-paper-2);
+  font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-ink-2);
+}
+.code-frame pre { margin: 0; padding: var(--space-md); overflow-x: auto; }
+.copy-btn {
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  min-height: 32px; padding: var(--space-3xs) var(--space-sm);
+  border: var(--border-pixel) solid var(--color-rule-strong); background: transparent;
+  color: var(--color-ink-2); font-family: var(--font-display); font-size: var(--px-12);
+  cursor: pointer; transition: transform var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.copy-btn:active { transform: scale(0.94); }
+.copy-btn[data-copied='1'] { color: var(--color-accent-text); border-color: var(--color-accent); }
+
+/* Shiki 双主题切换：暗色下改用 --shiki-dark 变量 */
+[data-theme='dark'] .astro-code,
+[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/* —— 搜索对话框 —— */
+dialog.search-dialog {
+  width: min(640px, calc(100% - 2 * var(--gutter)));
+  max-width: 100%;
+  padding: 0; border: var(--border-pixel) solid var(--color-ink);
+  background: var(--color-paper); color: var(--color-ink);
+  box-shadow: 6px 6px 0 var(--color-rule-strong);
+}
+dialog.search-dialog::backdrop { background: var(--color-overlay); }
+.search-dialog[open] { animation: search-in var(--dur-short) var(--ease-out); }
+.search-dialog[data-instant='1'][open] { animation: none; }
+@keyframes search-in {
+  from { opacity: 0; transform: scale(0.98) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.search-form { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-md); border-bottom: var(--border-pixel) solid var(--color-rule-strong); }
+.search-input {
+  flex: 1; min-width: 0; min-height: 44px; padding: var(--space-2xs) var(--space-sm);
+  border: var(--border-pixel) solid var(--color-rule-strong); background: var(--color-paper);
+  color: var(--color-ink); font-size: 1rem;
+}
+.search-input:focus-visible { outline-offset: 0; }
+.search-results { list-style: none; margin: 0; padding: var(--space-2xs); max-height: 50vh; overflow-y: auto; }
+.search-results a {
+  display: block; padding: var(--space-sm); color: var(--color-ink); text-decoration: none;
+}
+.search-results a:hover, .search-results a[aria-selected='true'] { background: var(--color-paper-2); }
+.search-results .sr-title { font-family: var(--font-display); font-size: var(--px-12); line-height: 1.6; }
+.search-results .sr-excerpt { margin-top: var(--space-3xs); font-size: var(--text-sm); color: var(--color-ink-2); }
+.search-hint { padding: var(--space-lg) var(--space-md); color: var(--color-ink-3); font-size: var(--text-sm); }
+.search-mark { background: var(--color-accent-soft); color: var(--color-accent-text); }
+
+/* —— 入场揭示（列表 stagger，无 JS 可见，62 号门禁的安全写法） —— */
+.js [data-reveal] {
+  opacity: 0; transform: translateY(8px);
+  transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 48ms);
+}
+.js [data-reveal].is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* —— 长循环的暂停控制（行路旅人） —— */
+.loop-toggle {
+  min-height: 36px; padding: var(--space-3xs) var(--space-sm);
+  border: var(--border-pixel) solid var(--color-rule-strong); background: var(--color-paper);
+  color: var(--color-ink-2); font-size: var(--px-12); cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.loop-toggle:active { transform: scale(0.94); }
+html:not(.js) .loop-toggle { display: none; }
+@media (prefers-reduced-motion: reduce) { .loop-toggle { display: none; } }

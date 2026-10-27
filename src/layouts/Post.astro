@@ -1,0 +1,199 @@
+---
+import { render } from 'astro:content';
+import Base from './Base.astro';
+import TOC from '@/components/TOC.astro';
+import Comments from '@/components/Comments.astro';
+import TagChip from '@/components/TagChip.astro';
+import { site } from '@/config';
+import { getPosts, readingTime, fmtDate, type Post } from '@/lib/posts';
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const posts = await getPosts();
+const idx = posts.findIndex((p) => p.id === post.id);
+const newer = idx > 0 ? posts[idx - 1] : null;
+const older = idx >= 0 && idx < posts.length - 1 ? posts[idx + 1] : null;
+
+const minutes = readingTime(post);
+const canonical = new URL(`/posts/${post.id}/`, site.url).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+  author: { '@type': 'Person', name: site.author, url: site.url },
+  url: canonical,
+  image: new URL('/og.png', site.url).href,
+  inLanguage: 'zh-CN',
+};
+---
+<Base title={post.data.title} description={post.data.description}>
+  <article class="post">
+    <header class="post-head" data-pagefind-body>
+      <div class="container">
+        <h1 class="post-title px">{post.data.title}</h1>
+        <div class="post-meta px">
+          <time datetime={post.data.pubDate.toISOString()}>{fmtDate(post.data.pubDate)}</time>
+          {
+            post.data.updatedDate && (
+              <span>
+                更新于<time datetime={post.data.updatedDate.toISOString()}>{fmtDate(post.data.updatedDate)}</time>
+              </span>
+            )
+          }
+          <span>约 {minutes} 分钟</span>
+        </div>
+        <div class="post-tags">
+          {post.data.tags.map((t) => <TagChip tag={t} />)}
+        </div>
+      </div>
+    </header>
+
+    <div class="post-body">
+      <div class="container post-grid">
+        <div class="prose" data-pagefind-body>
+          <Content />
+        </div>
+        <TOC headings={headings} />
+      </div>
+    </div>
+
+    <footer class="post-foot">
+      <div class="container">
+        <nav class="post-nav" aria-label="文章导航">
+          {
+            newer ? (
+              <a class="post-nav-item prev" href={`/posts/${newer.id}/`}>
+                <span class="post-nav-label px">上一篇</span>
+                <span class="post-nav-title px">{newer.data.title}</span>
+              </a>
+            ) : (
+              <span class="post-nav-item placeholder" />
+            )
+          }
+          {
+            older ? (
+              <a class="post-nav-item next" href={`/posts/${older.id}/`}>
+                <span class="post-nav-label px">下一篇</span>
+                <span class="post-nav-title px">{older.data.title}</span>
+              </a>
+            ) : (
+              <span class="post-nav-item placeholder" />
+            )
+          }
+        </nav>
+        <Comments />
+      </div>
+    </footer>
+  </article>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</Base>
+
+<style>
+  .post-head { padding-block: var(--space-2xl) var(--space-xl); }
+  .post-title {
+    font-size: var(--px-36);
+    line-height: 1.5;
+    max-width: 24em;
+  }
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    font-size: var(--px-12);
+    color: var(--color-ink-2);
+  }
+  .post-meta > * + * {
+    padding-left: var(--space-lg);
+    border-left: var(--border-pixel) solid var(--color-rule-strong);
+  }
+  .post-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-lg); }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+  }
+  .post-foot { margin-top: var(--space-2xl); }
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  .post-nav-item {
+    display: grid;
+    gap: var(--space-3xs);
+    padding: var(--space-md);
+    border: var(--border-pixel) solid var(--color-rule-strong);
+    background: var(--color-paper-2);
+    text-decoration: none;
+    transition: transform var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .post-nav-item:hover { border-color: var(--color-accent); transform: translate(-1px, -1px); }
+  }
+  .post-nav-item:active { transform: translate(1px, 1px); }
+  .post-nav-item.next { text-align: end; }
+  .post-nav-item.placeholder { visibility: hidden; }
+  .post-nav-label { font-size: var(--px-12); color: var(--color-ink-3); }
+  .post-nav-title { font-size: var(--px-12); color: var(--color-ink); line-height: 1.6; }
+
+  @media (min-width: 68.75rem) {
+    .post-grid { grid-template-columns: minmax(0, 1fr) 220px; gap: var(--space-2xl); }
+  }
+  @media (max-width: 40rem) {
+    .post-nav { grid-template-columns: 1fr; }
+    .post-nav-item.next { text-align: start; }
+  }
+</style>
+
+<script>
+  // 标题锚点
+  document.querySelectorAll('.prose h2[id], .prose h3[id]').forEach((h) => {
+    const a = document.createElement('a');
+    a.className = 'anchor';
+    a.href = `#${h.id}`;
+    a.setAttribute('aria-label', `链接到小节：${h.textContent ?? ''}`);
+    a.textContent = '#';
+    h.append(a);
+  });
+
+  // 代码块包框：标签栏 + 复制按钮（无 JS 时裸 pre 仍完整可读）
+  document.querySelectorAll('pre.astro-code').forEach((pre) => {
+    const fig = document.createElement('figure');
+    fig.className = 'code-frame';
+    const head = document.createElement('figcaption');
+    head.className = 'code-frame-head';
+    const lang = document.createElement('span');
+    lang.textContent = pre.dataset.language ?? 'text';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = '复制';
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code')?.textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.dataset.copied = '1';
+        btn.textContent = '已复制';
+      } catch {
+        btn.textContent = '复制失败';
+      }
+      setTimeout(() => {
+        btn.dataset.copied = '0';
+        btn.textContent = '复制';
+      }, 1200);
+    });
+    head.append(lang, btn);
+    pre.replaceWith(fig);
+    fig.append(head, pre);
+  });
+</script>

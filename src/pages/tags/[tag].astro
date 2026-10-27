@@ -1,0 +1,22 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHead from '@/components/PageHead.astro';
+import PostRow from '@/components/PostRow.astro';
+import { getPosts } from '@/lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const tags = new Map<string, number>();
+  posts.forEach((p) => p.data.tags.forEach((t) => tags.set(t, (tags.get(t) ?? 0) + 1)));
+  return [...tags.keys()].map((tag) => ({ params: { tag }, props: { tag, count: tags.get(tag)! } }));
+}
+
+const { tag, count } = Astro.props;
+const posts = (await getPosts()).filter((p) => p.data.tags.includes(tag));
+---
+<Base title={`标签：${tag}`} description={`标签「${tag}」下的 ${count} 篇文章。`}>
+  <PageHead title={tag} desc={`这个标签下共有 ${count} 篇文章。`} />
+  <div class="container">
+    {posts.map((p) => <PostRow post={p} compact />)}
+  </div>
+</Base>

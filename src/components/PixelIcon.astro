@@ -1,0 +1,26 @@
+---
+/** 像素图标：矩阵渲染为 SVG rect（单一图标库，全站统一） */
+interface Props {
+  m: string[];
+  size?: number;
+}
+const { m, size = 18 } = Astro.props;
+const w = m[0]?.length ?? 16;
+const h = m.length;
+let rects = '';
+m.forEach((row, y) => {
+  [...row].forEach((ch, x) => {
+    if (ch !== '.') rects += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  });
+});
+---
+<svg
+  width={size}
+  height={size}
+  viewBox={`0 0 ${w} ${h}`}
+  fill="currentColor"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+>
+  <Fragment set:html={rects} />
+</svg>

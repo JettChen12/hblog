@@ -1,0 +1,154 @@
+---
+/**
+ * 签名组件：行路旅人 —— 站训「千里之行，始于足下」的具象。
+ * 一个 12×14 像素旅人（兜帽 + 背包 + 珊瑚围巾）沿虚线路面行走；
+ * 可暂停（WCAG 2.2.2），离屏停止，减弱动态时站定。
+ */
+const PAL: Record<string, string> = {
+  K: 'var(--color-ink)',
+  P: 'var(--color-paper)',
+  A: 'var(--color-accent)',
+  R: 'var(--color-rule-strong)',
+};
+
+const BODY = [
+  '...KKKK.....',
+  '..KKKKKK....',
+  '..KKPPPK....',
+  '..KKPKPK....',
+  '...KPPK.....',
+  '...KKKK.....',
+  '..RRKKAA....',
+  '.RRRKKKKA...',
+  '.RRRKKKK....',
+  '..RRKKKK....',
+  '...KKKK.....',
+];
+const LEGS_A = ['..KK..KK....', '.KK....KK...', '.K......KK..'];
+const LEGS_B = ['....KKK.....', '....KKK.....', '....KKK.....'];
+
+function render(rows: string[]): string {
+  let out = '';
+  rows.forEach((row, y) => {
+    [...row].forEach((ch, x) => {
+      if (PAL[ch]) out += `<rect x="${x}" y="${y}" width="1" height="1" fill="${PAL[ch]}"/>`;
+    });
+  });
+  return out;
+}
+const frameA = render([...BODY, ...LEGS_A]);
+const frameB = render([...BODY, ...LEGS_B]);
+---
+<div class="road" data-loop>
+    <div class="road-dash" aria-hidden="true"></div>
+    <span class="footprint" aria-hidden="true"></span>
+  <div class="walker" aria-hidden="true">
+    <svg class="wf wf-a" viewBox="0 0 12 14" width="36" height="42" shape-rendering="crispEdges">
+      <Fragment set:html={frameA} />
+    </svg>
+    <svg class="wf wf-b" viewBox="0 0 12 14" width="36" height="42" shape-rendering="crispEdges">
+      <Fragment set:html={frameB} />
+    </svg>
+  </div>
+  <button class="loop-toggle px" type="button" data-loop-toggle aria-label="暂停行走动画">暂停</button>
+  <span class="visually-hidden">一个像素旅人在路面上行走，呼应站训「千里之行，始于足下」，此动画可暂停</span>
+</div>
+
+<style>
+  .road {
+    position: relative;
+    container-type: inline-size;
+    height: 64px;
+    margin-top: var(--space-lg);
+  }
+  .road-dash {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 14px;
+    height: var(--pixel-unit);
+    background: repeating-linear-gradient(90deg, var(--color-ink-3) 0 12px, transparent 12px 24px);
+  }
+  .footprint {
+    position: absolute;
+    bottom: 20px;
+    left: 56%;
+    width: 3px;
+    height: 3px;
+    background: var(--color-accent);
+  }
+  .footprint::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: -3px;
+    width: 3px;
+    height: 3px;
+    background: var(--color-accent);
+  }
+  .walker {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    width: 36px;
+    height: 42px;
+    animation: walk-across 46s linear infinite;
+  }
+  .walker .wf {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    animation: wf-cycle 0.56s linear infinite;
+  }
+  .wf-b {
+    animation-delay: -0.28s;
+    translate: 0 -2px; /* 并腿帧抬升 2px，走路节奏 */
+  }
+  .loop-toggle {
+    position: absolute;
+    right: 0;
+    bottom: 12px;
+  }
+
+  @keyframes walk-across {
+    from { transform: translateX(-48px); }
+    to { transform: translateX(calc(100cqw + 48px)); }
+  }
+  @keyframes wf-cycle {
+    0%, 49.9% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* 暂停态（悬停 / 聚焦 / 离屏 / 手动） */
+  .road:not(.is-running) .walker,
+  .road:not(.is-running) .wf {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .walker { animation: none; transform: translateX(48px); }
+    .wf { animation: none; }
+    .wf-a { opacity: 1; }
+    .wf-b { opacity: 0; }
+  }
+</style>
+
+<script>
+  // 长循环规范：离屏停止、悬停/聚焦暂停、可见的暂停控制
+  document.querySelectorAll<HTMLElement>('[data-loop]').forEach((road) => {
+    const btn = road.querySelector<HTMLButtonElement>('[data-loop-toggle]');
+    if (!btn) return;
+    const s = { seen: false, hover: false, focus: false, held: matchMedia('(prefers-reduced-motion: reduce)').matches };
+    const sync = () => {
+      const run = s.seen && !s.hover && !s.focus && !s.held;
+      road.classList.toggle('is-running', run);
+      btn.textContent = s.held ? '继续' : '暂停';
+    };
+    btn.addEventListener('click', () => { s.held = !s.held; sync(); });
+    road.addEventListener('pointerenter', () => { s.hover = true; sync(); });
+    road.addEventListener('pointerleave', () => { s.hover = false; sync(); });
+    road.addEventListener('focusin', () => { s.focus = true; sync(); });
+    road.addEventListener('focusout', () => { s.focus = false; sync(); });
+    new IntersectionObserver(([e]) => { s.seen = e.isIntersecting; sync(); }).observe(road);
+    s.seen = true; sync();
+  });
+</script>

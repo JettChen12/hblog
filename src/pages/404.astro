@@ -1,0 +1,34 @@
+---
+import Base from '@/layouts/Base.astro';
+import Walker from '@/components/Walker.astro';
+import { site } from '@/config';
+---
+<Base title="404" description="这一页不存在。">
+  <section class="nf container">
+    <p class="nf-code px num">404</p>
+    <h1 class="nf-title px">这条路还没修</h1>
+    <p class="nf-desc">地址可能敲错了，或者文章还没写出来。</p>
+    <div class="nf-actions">
+      <a class="btn" href="/">回首页</a>
+      <a class="btn btn--quiet" href="/archive/">看全部文章</a>
+    </div>
+    <Walker />
+  </section>
+</Base>
+
+<style>
+  .nf {
+    padding-block: var(--space-3xl) var(--space-xl);
+    max-width: 44em;
+  }
+  .nf-code {
+    font-size: var(--px-60);
+    color: var(--color-ink-3);
+    line-height: 1.2;
+  }
+  .nf-title { font-size: var(--px-36); margin-top: var(--space-sm); }
+  .nf-desc { margin-top: var(--space-md); color: var(--color-ink-2); }
+  .nf-actions { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-xl); }
+  /* 404 页的旅人放大 1.5 倍，站定的身影更醒目 */
+  .nf :global(.walker), .nf :global(.walker .wf) { width: 54px; height: 63px; }
+</style>

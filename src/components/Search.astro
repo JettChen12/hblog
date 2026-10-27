@@ -1,0 +1,132 @@
+---
+import PixelIcon from './PixelIcon.astro';
+
+const SEARCH = [
+  '.KKK....',
+  'K...K...',
+  'K...K...',
+  'K...K...',
+  '.KKKK...',
+  '.....KK.',
+  '......KK',
+  '.......K',
+];
+---
+<button class="icon-btn search-open" type="button" aria-label="搜索文章（快捷键 Ctrl 加 K）" title="搜索（Ctrl+K）">
+  <PixelIcon m={SEARCH} size={16} />
+</button>
+<dialog class="search-dialog" aria-label="站内搜索">
+  <form class="search-form" method="get" action="/archive/">
+    <PixelIcon m={SEARCH} size={16} />
+    <input
+      class="search-input"
+      type="search"
+      name="q"
+      placeholder="搜索文章…"
+      autocomplete="off"
+      aria-label="搜索关键词"
+    />
+    <kbd>Esc</kbd>
+  </form>
+  <ul class="search-results" hidden></ul>
+  <p class="search-hint">输入关键词检索全站文章。</p>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('.search-dialog');
+  const openBtn = document.querySelector<HTMLButtonElement>('.search-open');
+  const form = dialog?.querySelector<HTMLFormElement>('.search-form');
+  const input = dialog?.querySelector<HTMLInputElement>('.search-input');
+  const list = dialog?.querySelector<HTMLUListElement>('.search-results');
+  const hint = dialog?.querySelector<HTMLParagraphElement>('.search-hint');
+  type Pagefind = {
+    search: (q: string) => Promise<{ results: { data: () => Promise<{ url: string; excerpt: string; meta: { title?: string } }> }[] }>;
+  };
+  let pagefind: Pagefind | null = null;
+  let loading = false;
+
+  async function ensurePagefind(): Promise<Pagefind | null> {
+    if (pagefind || loading) return pagefind;
+    loading = true;
+    try {
+      // 运行时才存在的静态索引，必须用变量让构建器放行
+      const url = '/pagefind/pagefind.js';
+      pagefind = (await import(/* @vite-ignore */ url)) as unknown as Pagefind;
+    } catch {
+      pagefind = null;
+    }
+    loading = false;
+    return pagefind;
+  }
+
+  function open(instant: boolean) {
+    if (!dialog) return;
+    dialog.dataset.instant = instant ? '1' : '0';
+    dialog.showModal();
+    input?.focus();
+    input?.select();
+  }
+
+  openBtn?.addEventListener('click', () => open(false));
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      open(true); // 键盘唤起：零动画（E8）
+    } else if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+      const t = e.target as HTMLElement;
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return;
+      e.preventDefault();
+      open(true);
+    }
+  });
+
+  let debounce = 0;
+  input?.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = window.setTimeout(run, 160);
+  });
+
+  async function run() {
+    if (!input || !list || !hint) return;
+    const q = input.value.trim();
+    if (!q) { list.hidden = true; hint.hidden = false; hint.textContent = '输入关键词检索全站文章。'; return; }
+    const pf = await ensurePagefind();
+    if (!pf) {
+      list.hidden = true; hint.hidden = false;
+      hint.textContent = '搜索索引在构建后生成：pnpm build && pnpm preview 后可用。';
+      return;
+    }
+    const res = await pf.search(q, {});
+    const items = await Promise.all(res.results.slice(0, 8).map((r) => r.data()));
+    if (!items.length) {
+      list.hidden = true; hint.hidden = false;
+      hint.textContent = `没有找到与「${q}」相关的文章。`;
+      return;
+    }
+    hint.hidden = true;
+    list.replaceChildren(
+      ...items.map((it) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = it.url;
+        const t = document.createElement('span');
+        t.className = 'sr-title';
+        t.textContent = it.meta.title ?? it.url;
+        const ex = document.createElement('span');
+        ex.className = 'sr-excerpt';
+        ex.innerHTML = it.excerpt;
+        a.append(t, ex);
+        li.append(a);
+        return li;
+      }),
+    );
+    list.hidden = false;
+  }
+
+  // Enter 打开第一个结果
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const first = list?.querySelector('a');
+    if (first) window.location.assign(first.href);
+  });
+</script>

@@ -1,0 +1,48 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHead from '@/components/PageHead.astro';
+import PostRow from '@/components/PostRow.astro';
+import { getPosts } from '@/lib/posts';
+
+const posts = await getPosts();
+const byYear = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = p.data.pubDate.getFullYear();
+  byYear.set(y, [...(byYear.get(y) ?? []), p]);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+const total = posts.length;
+---
+<Base title="文章" description={`按年份归档的全部文章，共 ${total} 篇。`}>
+  <PageHead title="文章" desc={`共 ${total} 篇，按年份倒序排列。`} />
+  <div class="container archive">
+    {
+      years.map((y) => (
+        <section class="year" aria-label={`${y} 年`}>
+          <h2 class="year-title px num">{y}</h2>
+          <div class="year-rows">
+            {(byYear.get(y) ?? []).map((p) => (
+              <PostRow post={p} compact />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .archive { display: grid; gap: var(--space-2xl); padding-block: var(--space-md) var(--space-2xl); }
+  .year { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--space-lg); align-items: start; }
+  .year-title {
+    font-size: var(--px-36);
+    color: var(--color-rule-strong);
+    line-height: 1.2;
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-md));
+  }
+  @media (max-width: 40rem) {
+    .year { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
+    .year-title { position: static; font-size: var(--px-24); }
+  }
+</style>

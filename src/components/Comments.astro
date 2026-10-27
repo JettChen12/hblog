@@ -1,0 +1,77 @@
+---
+import { giscus } from '@/config';
+
+const configured = Boolean(giscus.repoId && giscus.categoryId);
+---
+<section class="comments" aria-label="评论区">
+  <h2 class="comments-title px">评论</h2>
+  {
+    configured ? (
+      <div
+        class="giscus-mount"
+        data-repo-id={giscus.repoId}
+        data-category-id={giscus.categoryId}
+        data-category={giscus.category}
+      >
+        <p class="comments-hint">评论由 GitHub Discussions 承载（giscus），滚入视图时加载。</p>
+      </div>
+    ) : (
+      <p class="comments-hint">
+        评论区还没配置：打开 <code>src/config.ts</code>，按 giscus 的注释填入两个 ID 即可开启。
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .comments { margin-top: var(--space-2xl); }
+  .comments-title {
+    font-size: var(--px-24);
+    padding-bottom: var(--space-xs);
+    border-bottom: var(--border-pixel) solid var(--color-rule);
+    margin-bottom: var(--space-md);
+  }
+  .comments-hint { color: var(--color-ink-3); font-size: var(--text-sm); }
+</style>
+
+<script>
+  const mount = document.querySelector('.giscus-mount');
+  if (mount) {
+    let started = false;
+    const theme = () => (document.documentElement.dataset.theme === 'dark' ? 'transparent_dark' : 'light');
+    const start = () => {
+      if (started) return;
+      started = true;
+      mount.replaceChildren();
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      const d = mount.dataset;
+      s.setAttribute('data-repo', 'JettChen12/hblog');
+      s.setAttribute('data-repo-id', d.repoId ?? '');
+      s.setAttribute('data-category', d.category ?? 'Announcements');
+      s.setAttribute('data-category-id', d.categoryId ?? '');
+      s.setAttribute('data-mapping', 'pathname');
+      s.setAttribute('data-strict', '1');
+      s.setAttribute('data-reactions-enabled', '1');
+      s.setAttribute('data-emit-metadata', '0');
+      s.setAttribute('data-input-position', 'top');
+      s.setAttribute('data-theme', theme());
+      s.setAttribute('data-lang', 'zh-CN');
+      s.setAttribute('data-loading', 'lazy');
+      mount.append(s);
+    };
+    new IntersectionObserver(([e], io) => {
+      if (e.isIntersecting) { start(); io.disconnect(); }
+    }, { rootMargin: '400px 0px' }).observe(mount);
+    // 主题切换时同步评论主题
+    window.addEventListener('theme-change', (e) => {
+      const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+      iframe?.contentWindow?.postMessage(
+        { giscus: { setConfig: { theme: (e as CustomEvent).detail === 'dark' ? 'transparent_dark' : 'light' } } },
+        'https://giscus.app',
+      );
+    });
+  }
+</script>

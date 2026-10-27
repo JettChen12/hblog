@@ -1,0 +1,127 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+const { headings } = Astro.props;
+const items = (headings as Heading[]).filter((h) => h.depth === 2 || h.depth === 3);
+---
+{
+  items.length > 0 && (
+    <>
+      <nav class="toc" aria-label="文章目录">
+        <p class="toc-title px">目录</p>
+        <ul>
+          {items.map((h) => (
+            <li class:list={['toc-item', { d3: h.depth === 3 }]}>
+              <a class="toc-link" href={`#${h.slug}`}>
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <details class="toc-mobile">
+        <summary class="px">目录</summary>
+        <ul>
+          {items.map((h) => (
+            <li class:list={[{ d3: h.depth === 3 }]}>
+              <a class="toc-link" href={`#${h.slug}`}>
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </>
+  )
+}
+
+<style>
+  .toc {
+    position: sticky;
+    top: calc(var(--nav-h) + var(--space-lg));
+    align-self: start;
+    max-height: calc(100vh - var(--nav-h) - var(--space-2xl));
+    overflow-y: auto;
+    display: none;
+  }
+  .toc-title {
+    font-size: var(--px-12);
+    color: var(--color-ink-3);
+    margin-bottom: var(--space-sm);
+  }
+  .toc ul { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc-link {
+    display: block;
+    padding: var(--space-3xs) var(--space-xs);
+    border-left: var(--border-pixel) solid transparent;
+    color: var(--color-ink-2);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    line-height: 1.6;
+    transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+  }
+  .toc .d3 .toc-link { padding-inline-start: var(--space-lg); }
+  @media (hover: hover) and (pointer: fine) {
+    .toc-link:hover { color: var(--color-ink); }
+  }
+  .toc-link[aria-current='location'] {
+    color: var(--color-accent-text);
+    border-left-color: var(--color-accent);
+  }
+
+  .toc-mobile {
+    margin-bottom: var(--space-lg);
+    border: var(--border-pixel) solid var(--color-rule);
+    background: var(--color-paper-2);
+  }
+  .toc-mobile summary {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--px-12);
+    cursor: pointer;
+    list-style: none;
+  }
+  .toc-mobile summary::before { content: '▸ '; color: var(--color-ink-3); }
+  .toc-mobile[open] summary::before { content: '▾ '; }
+  .toc-mobile summary::-webkit-details-marker { display: none; }
+  .toc-mobile ul { list-style: none; margin: 0; padding: var(--space-2xs) var(--space-md) var(--space-md); }
+  .toc-mobile .toc-link { display: block; padding: var(--space-3xs) 0; }
+
+  @media (min-width: 68.75rem) {
+    .toc { display: block; }
+    .toc-mobile { display: none; }
+  }
+</style>
+
+<script>
+  // 滚动高亮当前小节（目录链接即时变色，无动画）
+  const links = new Map<string, HTMLElement[]>();
+  document.querySelectorAll<HTMLAnchorElement>('.toc-link').forEach((a) => {
+    const id = decodeURIComponent(a.hash.slice(1));
+    links.set(id, [...(links.get(id) ?? []), a]);
+  });
+  const heads = [...links.keys()]
+    .map((id) => document.getElementById(id))
+    .filter((el): el is HTMLElement => !!el);
+  if (heads.length) {
+    const active = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) active.add(e.target.id);
+          else active.delete(e.target.id);
+        }
+        const current = [...active][0] ?? heads[0].id;
+        links.forEach((arr, id) => arr.forEach((a) => {
+          if (id === current) a.setAttribute('aria-current', 'location');
+          else a.removeAttribute('aria-current');
+        }));
+      },
+      { rootMargin: '-96px 0px -70% 0px' },
+    );
+    heads.forEach((h) => io.observe(h));
+  }
+</script>

@@ -1,0 +1,63 @@
+---
+import '@fontsource-variable/jetbrains-mono';
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+import '@/styles/font-pixel.css';
+import '@/styles/ui.css';
+import '@/styles/prose.css';
+import Nav from '@/components/Nav.astro';
+import Footer from '@/components/Footer.astro';
+import { site } from '@/config';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const pageTitle = title === site.name ? `${site.name} · ${site.tagline}` : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImage = new URL('/og.png', site.url).href;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate icon" href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href={new URL('/rss.xml', site.url).href} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f3f9" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#191c2c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      // 首帧前设定主题，避免闪烁；js 类供入场揭示的可见性规则使用
+      (function () {
+        document.documentElement.classList.add('js');
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        var d = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = d ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到正文</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

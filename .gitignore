@@ -1,0 +1,27 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+*.log
+
+# environment
+.env
+.env.*
+
+# tooling caches
+.hallmark/
+tools/fonts/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local agent/skill configs (not part of the blog itself)
+.agents/
+.claude/
+skills-lock.json

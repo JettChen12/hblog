@@ -1,0 +1,106 @@
+/* H-BLOG 正文排版：文章主体（Markdown 渲染结果无类名，靠容器作用域） */
+
+.prose {
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.85;
+}
+.prose > * + * { margin-top: var(--space-lg); }
+.prose [id] { scroll-margin-top: calc(var(--nav-h) + var(--space-lg)); }
+
+.prose h2, .prose h3, .prose h4 {
+  position: relative;
+  margin-top: var(--space-2xl);
+  margin-bottom: var(--space-md);
+  line-height: 1.5;
+}
+.prose h2 { font-size: var(--px-24); padding-bottom: var(--space-xs); border-bottom: var(--border-pixel) solid var(--color-rule); }
+.prose h3 { font-size: var(--px-24); }
+.prose h4 { font-size: var(--px-12); color: var(--color-ink-2); }
+
+/* 标题锚链接：悬停才出现 */
+.prose .anchor {
+  position: absolute; inset-inline-start: calc(-1 * var(--space-lg));
+  color: var(--color-ink-3); text-decoration: none; opacity: 0;
+  transition: opacity var(--dur-micro) var(--ease-out);
+}
+.prose h2:hover .anchor, .prose h3:hover .anchor,
+.prose h2:focus-within .anchor, .prose h3:focus-within .anchor { opacity: 1; }
+
+.prose p { max-width: var(--measure-body); }
+.prose a { text-decoration-thickness: 2px; }
+.prose strong { font-weight: 700; }
+
+.prose ul, .prose ol { padding-inline-start: var(--space-xl); max-width: var(--measure-body); }
+.prose li + li { margin-top: var(--space-xs); }
+.prose li::marker { color: var(--color-accent-text); }
+
+.prose blockquote {
+  margin-inline: 0; padding: var(--space-md) var(--space-lg);
+  border-inline-start: 4px solid var(--color-accent);
+  background: var(--color-paper-2);
+  color: var(--color-ink-2);
+  max-width: var(--measure-body);
+}
+.prose blockquote > * + * { margin-top: var(--space-sm); }
+.prose blockquote p { color: var(--color-ink-2); }
+
+.prose table {
+  width: 100%; border-collapse: collapse; font-size: var(--text-sm);
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  margin-top: var(--space-xl);
+}
+.prose th, .prose td {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-pixel) solid var(--color-rule);
+  text-align: start; vertical-align: top;
+}
+.prose thead th { background: var(--color-paper-2); font-weight: 700; }
+.prose table code { white-space: nowrap; }
+
+.prose img {
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  margin-inline: auto;
+}
+.prose figure { margin: var(--space-lg) 0; }
+.prose figcaption {
+  margin-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-ink-3);
+  text-align: center;
+}
+
+/* 代码块（无 JS 时裸 pre 也有完整样式；JS 包框后由 ui.css 接管边框） */
+.prose pre.astro-code {
+  background: var(--color-code-bg);
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  padding: var(--space-md);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  max-width: 100%;
+}
+.code-frame pre.astro-code { border: 0; padding: var(--space-md); }
+
+/* 行内代码 */
+.prose :not(pre) > code {
+  padding: var(--space-3xs) var(--space-2xs);
+  background: var(--color-paper-3);
+  border: 1px solid var(--color-rule);
+  color: var(--color-accent-text);
+  word-break: break-word;
+}
+.prose pre code { background: none; border: 0; padding: 0; color: inherit; }
+
+.prose hr {
+  border: 0; border-top: var(--border-pixel) dashed var(--color-rule-strong);
+  margin-block: var(--space-2xl);
+}
+
+.prose kbd {
+  padding: var(--space-3xs) var(--space-2xs);
+  border: var(--border-pixel) solid var(--color-rule-strong);
+  border-bottom-width: 4px; background: var(--color-paper-2);
+  font-family: var(--font-mono); font-size: 0.85em;
+}
+
+/* 任务列表 */
+.prose ul.contains-task-list { list-style: none; padding-inline-start: var(--space-md); }
+.prose .task-list-item input { margin-inline-end: var(--space-xs); accent-color: var(--color-accent); }

@@ -1,0 +1,107 @@
+---
+import Base from '@/layouts/Base.astro';
+import Walker from '@/components/Walker.astro';
+import PostRow from '@/components/PostRow.astro';
+import { site } from '@/config';
+import { getPosts } from '@/lib/posts';
+
+const posts = await getPosts();
+const latest = posts[0];
+const list = posts.slice(0, 5);
+---
+<Base title={site.name} description={`${site.tagline}。${site.intro}`}>
+  <section class="hero">
+    <div class="container">
+      <h1 class="hero-title px">{site.name}</h1>
+      <p class="hero-tagline px">{site.tagline}</p>
+      <p class="hero-intro">{site.intro}</p>
+      <div class="hero-actions">
+        {
+          latest && (
+            <a class="btn" href={`/posts/${latest.id}/`}>
+              读最新一篇
+            </a>
+          )
+        }
+        <a class="btn btn--quiet" href="/about/">关于我</a>
+      </div>
+      <Walker />
+    </div>
+  </section>
+
+  <section class="home-list" aria-labelledby="latest">
+    <div class="container">
+      <h2 id="latest" class="home-list-title px">最新文章</h2>
+      <div class="home-list-rows">
+        {
+          list.map((p, i) => (
+            <div data-reveal style={`--i:${i}`}>
+              <PostRow post={p} />
+            </div>
+          ))
+        }
+      </div>
+      {
+        posts.length > 5 ? (
+          <div class="home-more">
+            <a class="btn btn--quiet" href="/archive/">全部文章（{posts.length} 篇）</a>
+          </div>
+        ) : null
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-3xl) var(--space-xl);
+  }
+  .hero-title {
+    font-size: var(--px-60);
+    line-height: 1.2;
+    margin-left: calc(-1 * var(--space-3xs)); /* 像素字光学对齐 */
+  }
+  .hero-tagline {
+    margin-top: var(--space-md);
+    font-size: var(--px-24);
+    color: var(--color-ink-2);
+  }
+  .hero-intro {
+    margin-top: var(--space-md);
+    font-size: var(--text-lead);
+    color: var(--color-ink-2);
+    max-width: 40em;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+  }
+
+  .home-list { padding-block: var(--space-lg) var(--space-2xl); }
+  .home-list-title {
+    font-size: var(--px-24);
+    margin-bottom: var(--space-lg);
+  }
+  .home-more { margin-top: var(--space-lg); }
+  @media (max-width: 40rem) {
+    .hero { padding-block: var(--space-xl) var(--space-lg); }
+  }
+</style>
+
+<script>
+  // 列表入场揭示：进入视口一次性到位（无 JS 时全部可见）
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      });
+    },
+    { rootMargin: '0px 0px -10% 0px' },
+  );
+  document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+</script>

@@ -1,0 +1,113 @@
+/* Hallmark · shape: Waypoint(行路) · genre: editorial · theme: custom · job: read (the latest post) · idea: "一台行路者的像素终端，文章是路上的里程碑，一个像素旅人替站训走下去" · vibe: "克制复古，深墨珊瑚，像素旅人"
+ * paper: oklch(21% 0.032 273) / oklch(95.5% 0.012 265) · accent: oklch(75% 0.135 50) / oklch(72% 0.145 49) · display: Fusion Pixel 12px · body: system CJK stack · hero: wordmark 与站训左置，虚线路面上像素旅人行走于首屏底部 · nav: 单行粘顶，方块字标居左 · footer: 桅杆式，字标加链接加版权行 · imagery: none(类型与像素几何承载) · signature: 沿虚线路面行走的像素旅人(千里之行始于足下)
+ * axes: dark/pixel-mono/warm-coral · posture: Restrained · contrast: pass(数值核验，正文≥4.5:1，双模式) · fold: pass(1280x800 首屏含字标、站训、主行动与旅人) · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V5 · weakest: R, 砍掉 CRT 扫描线与视差两个念头，全站只留行走旅人这一个签名 */
+/* Hallmark · waive 47b · real code blocks, not mock chrome: no traffic lights, no URL bar, a pre plus a copy button holding the blog's own article code · 技术博客的代码块是真实材料
+/* Hallmark · waive 37 · mono carries exactly one role · code blocks are this blog's own body material, so the code face stays a single-purpose outlier */
+/* Hallmark · dismissed 3 · checked every blockquote across the post pages · it is an editorial quote bar inside the prose measure, not a card: no radius, no shadow, no icon tile */
+
+:root {
+  /* 间距（8px 网格，4px 半步） */
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px;
+  --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  /* 正文字号（系统字体渲染） */
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lead: 1.125rem; --text-lg: 1.25rem;
+  /* 像素字号：必须是 12 的整数倍，保证点阵锐利 */
+  --px-12: 12px; --px-24: 24px; --px-36: 36px; --px-48: 48px; --px-60: 60px;
+  --font-pixel-size: 12px;
+  /* 缓动（Emil：入场强 ease-out，屏幕内移动 ease-in-out） */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-micro: 120ms; --dur-short: 200ms; --dur-long: 300ms;
+  /* 画布 */
+  --container: 1120px; --gutter: 48px; --measure-body: 40em;
+  /* z 轴 */
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300;
+  --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+  /* 像素原语 */
+  --pixel-unit: 2px; --border-pixel: 2px;
+  --shadow-pixel: 4px 4px 0 var(--color-rule-strong);
+  --shadow-pixel-down: 1px 1px 0 var(--color-rule-strong);
+  --nav-h: 64px;
+  /* 状态色 */
+  --color-error: #c0392b; --color-success: #2f7d3a;
+  --color-overlay: rgba(25, 28, 44, 0.6);
+
+  /* —— 亮色（纸面：冷调极浅蓝墨） —— */
+  --color-paper: #f2f3f9;
+  --color-paper-2: #e9ebf5;
+  --color-paper-3: #dfe2f0;
+  --color-ink: #1c1f33;
+  --color-ink-2: #4a5070;
+  --color-ink-3: #6d7494;
+  --color-rule: #c9cde3;
+  --color-rule-strong: #a9afc9;
+  --color-accent: #ef7d57;
+  --color-accent-text: #b8391f;
+  --color-accent-soft: rgba(239, 125, 87, 0.14);
+  --color-accent-ink: #1c1f33;
+  --color-focus: #b8391f;
+  --color-code-bg: #e7e9f4;
+  --color-selection-bg: #ef7d57;
+  --color-selection-ink: #1c1f33;
+  color-scheme: light;
+
+  /* 字体
+     展示：缝合像素字体 12px 等宽（自托管分包，见 src/styles/font-pixel.css）
+     正文：系统中文字体栈（零请求，正文可读性优先）
+     代码：JetBrains Mono 可变字重，中文注释回退正文字体 */
+  --font-display: "FusionPixel", ui-monospace, monospace;
+  --font-body: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Consolas, "PingFang SC", "Microsoft YaHei", monospace;
+}
+
+/* —— 暗色（默认跟随系统，纸面：深蓝墨，Sweetie-16 血统） —— */
+[data-theme="dark"] {
+  --color-paper: #191c2c;
+  --color-paper-2: #202437;
+  --color-paper-3: #282c46;
+  --color-ink: #e8ebf5;
+  --color-ink-2: #a6adcb;
+  --color-ink-3: #7c84a6;
+  --color-rule: #313551;
+  --color-rule-strong: #454a6b;
+  --color-accent: #ff8f61;
+  --color-accent-text: #ffa07c;
+  --color-accent-soft: rgba(255, 143, 97, 0.14);
+  --color-accent-ink: #191c2c;
+  --color-focus: #ff8f61;
+  --color-code-bg: #141626;
+  --color-selection-bg: #ff8f61;
+  --color-selection-ink: #191c2c;
+  color-scheme: dark;
+}
+
+/* 无 JS / 无内联属性时，跟随系统偏好 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-paper: #191c2c;
+    --color-paper-2: #202437;
+    --color-paper-3: #282c46;
+    --color-ink: #e8ebf5;
+    --color-ink-2: #a6adcb;
+    --color-ink-3: #7c84a6;
+    --color-rule: #313551;
+    --color-rule-strong: #454a6b;
+    --color-accent: #ff8f61;
+    --color-accent-text: #ffa07c;
+    --color-accent-soft: rgba(255, 143, 97, 0.14);
+    --color-accent-ink: #191c2c;
+    --color-focus: #ff8f61;
+    --color-code-bg: #141626;
+    --color-selection-bg: #ff8f61;
+    --color-selection-ink: #191c2c;
+    color-scheme: dark;
+  }
+}
+
+@media (max-width: 60rem) {
+  :root { --gutter: 24px; --nav-h: 56px; }
+}
+@media (max-width: 40rem) {
+  :root { --gutter: 16px; }
+}

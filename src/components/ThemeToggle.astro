@@ -1,0 +1,56 @@
+---
+import PixelIcon from './PixelIcon.astro';
+
+const SUN = [
+  '....KK....',
+  '..........',
+  '..KKKKKK..',
+  '..KKKKKK..',
+  'KKKKKKKKKK',
+  'KKKKKKKKKK',
+  '..KKKKKK..',
+  '..KKKKKK..',
+  '..........',
+  '....KK....',
+];
+const MOON = [
+  '...KKK....',
+  '..KKKKK...',
+  '.KKKKKK...',
+  '.KKKK.....',
+  'KKKK......',
+  'KKKK......',
+  '.KKKK.....',
+  '.KKKKKK...',
+  '..KKKKK...',
+  '...KKK....',
+];
+---
+<button class="icon-btn theme-toggle" type="button" aria-label="切换明暗主题">
+  <span class="tt-sun"><PixelIcon m={SUN} size={18} /></span>
+  <span class="tt-moon"><PixelIcon m={MOON} size={18} /></span>
+</button>
+
+<style>
+  .theme-toggle span { display: grid; place-items: center; }
+  :global([data-theme='dark']) .tt-sun { display: none; }
+  :global([data-theme='light']) .tt-moon { display: none; }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const PAPER: Record<string, string> = { dark: '#191c2c', light: '#f2f3f9' };
+  function applyMetas(theme: string) {
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
+      m.content = PAPER[theme] ?? m.content;
+    });
+  }
+  btn?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch { /* 隐私模式下忽略 */ }
+    applyMetas(next);
+    window.dispatchEvent(new CustomEvent('theme-change', { detail: next }));
+  });
+</script>

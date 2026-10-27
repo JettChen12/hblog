@@ -1,0 +1,68 @@
+---
+import type { Post } from '@/lib/posts';
+import { fmtDate } from '@/lib/posts';
+import TagChip from './TagChip.astro';
+
+interface Props {
+  post: Post;
+  /** 紧凑模式：归档 / 标签页只显示日期与标题 */
+  compact?: boolean;
+}
+const { post, compact = false } = Astro.props;
+---
+<article class:list={['post-row', { compact }]}>
+  <time class="post-row-date px num" datetime={post.data.pubDate.toISOString()}>
+    {fmtDate(post.data.pubDate)}
+  </time>
+  <div class="post-row-main">
+    <h3 class="post-row-title px">
+      <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+    </h3>
+    {!compact && <p class="post-row-desc">{post.data.description}</p>}
+    {!compact && (
+      <div class="post-row-tags">
+        {post.data.tags.map((t) => <TagChip tag={t} />)}
+      </div>
+    )}
+  </div>
+</article>
+
+<style>
+  .post-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: var(--space-md);
+    padding-block: var(--space-lg);
+    border-top: var(--border-pixel) solid var(--color-rule);
+  }
+  .post-row:last-child { border-bottom: var(--border-pixel) solid var(--color-rule); }
+  .post-row-date {
+    font-size: var(--px-12);
+    color: var(--color-ink-2);
+    padding-top: var(--space-2xs);
+    white-space: nowrap;
+  }
+  .post-row-title { font-size: var(--px-24); line-height: 1.4; }
+  .post-row-title a {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .post-row-title a:hover { color: var(--color-accent-text); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.22em; }
+  }
+  .post-row-title a:focus-visible { outline-offset: 4px; }
+  .post-row-desc {
+    margin-top: var(--space-xs);
+    color: var(--color-ink-2);
+    font-size: var(--text-md);
+    max-width: 60ch;
+  }
+  .post-row-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-sm); }
+  .compact { grid-template-columns: 120px minmax(0, 1fr); align-items: baseline; padding-block: var(--space-md); }
+
+  @media (max-width: 40rem) {
+    .post-row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xs); }
+    .post-row-date { padding-top: 0; }
+  }
+</style>

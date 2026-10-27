@@ -1,0 +1,33 @@
+---
+/** H 字标：7×8 像素 H + 右下角一粒珊瑚（足下的第一步） */
+interface Props { size?: number }
+const { size = 24 } = Astro.props;
+const M = [
+  '..KKK..',
+  '..K.K..',
+  '..K.K..',
+  '..KKK..',
+  '..K.K..',
+  '..K.K..',
+  '..K.K..',
+  '......A',
+];
+let rects = '';
+M.forEach((row, y) => {
+  [...row].forEach((ch, x) => {
+    if (ch === 'K') rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="var(--color-paper)"/>`;
+    if (ch === 'A') rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="var(--color-accent)"/>`;
+  });
+});
+---
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 8 9"
+  shape-rendering="crispEdges"
+  role="img"
+  aria-label="H-BLOG 字标"
+>
+  <rect width="8" height="9" fill="var(--color-ink)" />
+  <Fragment set:html={rects} />
+</svg>

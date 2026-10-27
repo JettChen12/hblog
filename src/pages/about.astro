@@ -1,0 +1,78 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHead from '@/components/PageHead.astro';
+import { site, profile } from '@/config';
+
+const avatarAlt = `${profile.name} 的像素头像`;
+---
+<Base title="关于" description={`${profile.name} 的个人简介：${profile.role}。`}>
+  <PageHead title="关于" />
+  <div class="container about">
+    <aside class="about-card">
+      <img class="about-avatar pixelated" src={profile.avatar} width={96} height={96} alt={avatarAlt} />
+      <h2 class="about-name px">{profile.name}</h2>
+      <p class="about-role px">{profile.role}</p>
+      <ul class="about-links">
+        {
+          profile.links.map((l) => (
+            <li>
+              <a class="chip" href={l.href} rel="me">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+
+    <div class="about-body">
+      {profile.bio.map((para) => <p class="about-bio">{para}</p>)}
+      <h3 class="px about-sub">在用与在学</h3>
+      <ul class="about-skills">
+        {profile.skills.map((s) => <li class="chip">{s}</li>)}
+      </ul>
+      <h3 class="px about-sub">这个站</h3>
+      <p class="about-bio">
+        用 <a href="https://astro.build">Astro</a> 搭的纯静态博客，文章以 Markdown
+        写作、推送到 <a href="https://github.com/JettChen12/hblog">GitHub 仓库</a>后自动构建。像素字体是开源的
+        <a href="https://fusion-pixel-font.takwolf.com">缝合像素字体</a>。
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    padding-block: var(--space-md) var(--space-2xl);
+  }
+  .about-card {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    border: var(--border-pixel) solid var(--color-rule-strong);
+    background: var(--color-paper-2);
+    width: fit-content;
+  }
+  .about-avatar { width: 96px; height: 96px; }
+  .about-name { font-size: var(--px-24); }
+  .about-role { font-size: var(--px-12); color: var(--color-ink-2); }
+  .about-links { list-style: none; margin: var(--space-xs) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .about-body { max-width: 46em; }
+  .about-bio { color: var(--color-ink-2); font-size: var(--text-lead); }
+  .about-bio + .about-bio { margin-top: var(--space-md); }
+  .about-sub {
+    font-size: var(--px-24);
+    margin-top: var(--space-xl);
+    padding-bottom: var(--space-3xs);
+    border-bottom: var(--border-pixel) solid var(--color-rule);
+  }
+  .about-skills { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+
+  @media (min-width: 60rem) {
+    .about { grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-2xl); }
+  }
+</style>

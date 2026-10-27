@@ -1,0 +1,84 @@
+---
+import { site, nav, profile } from '@/config';
+import HMark from './HMark.astro';
+import PixelIcon from './PixelIcon.astro';
+
+const RSS = [
+  '..........',
+  '..........',
+  '.......K..',
+  '......K...',
+  '..KKK.K...',
+  '.K...KKKK.',
+  'K...K...K.',
+  '..........',
+];
+const year = new Date().getFullYear();
+const github = profile.links.find((l) => l.href.includes('github.com'));
+---
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/" aria-label={`${site.name}，返回首页`}>
+          <HMark size={26} />
+          <span class="px brand-name">{site.name}</span>
+        </a>
+        <p class="footer-tagline px">{site.tagline}</p>
+      </div>
+      <nav class="footer-links" aria-label="页脚导航">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <div class="footer-meta">
+        <a href="/rss.xml"><PixelIcon m={RSS} size={14} /> RSS</a>
+        {github && <a href={github.href} rel="me">GitHub</a>}
+        <a href="https://github.com/JettChen12/hblog">源码</a>
+      </div>
+    </div>
+    <p class="footer-line">
+      © {site.since === year ? year : `${site.since}–${year}`} {site.name} · 用 <a href="https://astro.build">Astro</a> 构建 · 像素字体 <a href="https://fusion-pixel-font.takwolf.com">缝合像素字体</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-top: var(--space-3xl);
+    border-top: var(--border-pixel) solid var(--color-rule);
+    background: var(--color-paper-2);
+  }
+  .container { padding-block: var(--space-2xl); }
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xl) var(--space-3xl);
+    align-items: flex-start;
+  }
+  .footer-brand { display: grid; gap: var(--space-sm); }
+  .brand {
+    display: inline-flex; align-items: center; gap: var(--space-sm);
+    color: var(--color-ink); text-decoration: none;
+  }
+  .brand-name { font-size: var(--px-24); line-height: 1; }
+  .footer-tagline { font-size: var(--px-12); color: var(--color-ink-2); }
+  .footer-links, .footer-meta {
+    display: flex; flex-direction: column; gap: var(--space-xs);
+  }
+  .footer-links a, .footer-meta a {
+    color: var(--color-ink-2); text-decoration: none; font-size: var(--text-sm);
+    width: fit-content;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .footer-meta a { display: inline-flex; align-items: center; gap: var(--space-2xs); }
+  @media (hover: hover) and (pointer: fine) {
+    .footer-links a:hover, .footer-meta a:hover { color: var(--color-accent-text); }
+  }
+  .footer-line {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-md);
+    border-top: var(--border-pixel) solid var(--color-rule);
+    font-size: var(--text-sm);
+    color: var(--color-ink-3);
+  }
+  .footer-line a { color: var(--color-ink-2); }
+</style>
