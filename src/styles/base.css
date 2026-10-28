@@ -12,7 +12,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-paper);
+  background-color: var(--color-paper);
+  background-image: repeating-conic-gradient(
+    color-mix(in oklab, var(--color-ink) 4%, transparent) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 12px 12px;
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 1rem;

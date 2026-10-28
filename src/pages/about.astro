@@ -27,11 +27,11 @@ const avatarAlt = `${profile.name} 的像素头像`;
 
     <div class="about-body">
       {profile.bio.map((para) => <p class="about-bio">{para}</p>)}
-      <h3 class="px about-sub">在用与在学</h3>
+      <h3 class="px px-mark about-sub">在用与在学</h3>
       <ul class="about-skills">
         {profile.skills.map((s) => <li class="chip">{s}</li>)}
       </ul>
-      <h3 class="px about-sub">这个站</h3>
+      <h3 class="px px-mark about-sub">这个站</h3>
       <p class="about-bio">
         用 <a href="https://astro.build">Astro</a> 搭的纯静态博客，文章以 Markdown
         写作、推送到 <a href="https://github.com/JettChen12/hblog">GitHub 仓库</a>后自动构建。像素字体是开源的

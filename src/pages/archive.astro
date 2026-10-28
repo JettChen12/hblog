@@ -19,7 +19,7 @@ const total = posts.length;
     {
       years.map((y) => (
         <section class="year" aria-label={`${y} 年`}>
-          <h2 class="year-title px num">{y}</h2>
+          <h2 class="year-title px px-mark num">{y}</h2>
           <div class="year-rows">
             {(byYear.get(y) ?? []).map((p) => (
               <PostRow post={p} compact />
@@ -38,8 +38,6 @@ const total = posts.length;
     font-size: var(--px-36);
     color: var(--color-rule-strong);
     line-height: 1.2;
-    position: sticky;
-    top: calc(var(--nav-h) + var(--space-md));
   }
   @media (max-width: 40rem) {
     .year { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }

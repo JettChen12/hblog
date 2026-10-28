@@ -1,6 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
-import Walker from '@/components/Walker.astro';
+import PixelScene from '@/components/PixelScene.astro';
 import PostRow from '@/components/PostRow.astro';
 import { site } from '@/config';
 import { getPosts } from '@/lib/posts';
@@ -25,13 +25,13 @@ const list = posts.slice(0, 5);
         }
         <a class="btn btn--quiet" href="/about/">关于我</a>
       </div>
-      <Walker />
+      <PixelScene />
     </div>
   </section>
 
   <section class="home-list" aria-labelledby="latest">
     <div class="container">
-      <h2 id="latest" class="home-list-title px">最新文章</h2>
+      <h2 id="latest" class="home-list-title px px-mark">最新文章</h2>
       <div class="home-list-rows">
         {
           list.map((p, i) => (

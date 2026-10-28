@@ -44,8 +44,14 @@ const github = profile.links.find((l) => l.href.includes('github.com'));
 <style>
   .footer {
     margin-top: var(--space-3xl);
-    border-top: var(--border-pixel) solid var(--color-rule);
     background: var(--color-paper-2);
+  }
+  .footer::before {
+    content: '';
+    display: block;
+    height: 8px;
+    background: repeating-conic-gradient(var(--color-rule-strong) 0% 25%, transparent 0% 50%);
+    background-size: 8px 8px;
   }
   .container { padding-block: var(--space-2xl); }
   .footer-top {

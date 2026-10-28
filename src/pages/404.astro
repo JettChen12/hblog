@@ -1,23 +1,62 @@
 ---
 import Base from '@/layouts/Base.astro';
-import Walker from '@/components/Walker.astro';
 import { site } from '@/config';
+
+/** 像素路牌（静态）：这条路还没修 */
+const SIGN: Record<string, string> = {
+  I: 'var(--color-ink)',
+  P: 'var(--color-paper)',
+  A: 'var(--color-accent)',
+  R: 'var(--color-rule-strong)',
+};
+const M = [
+  '......I......',
+  '......I......',
+  '.IIIIIIIIII..',
+  '.IPPPPPPPPI..',
+  '.IPPPAPPPPI..',
+  '.IIIIIIIIII..',
+  '......I......',
+  '......I......',
+  '......I......',
+  '......I......',
+  '......I......',
+  '......I......',
+  '.....III.....',
+  '....IIIII....',
+  '.R...IIIII.R.',
+  '..R.......R..',
+];
+let sign = '';
+M.forEach((row, y) => {
+  [...row].forEach((ch, x) => {
+    if (SIGN[ch]) sign += `<rect x="${x}" y="${y}" width="1" height="1" fill="${SIGN[ch]}"/>`;
+  });
+});
 ---
 <Base title="404" description="这一页不存在。">
   <section class="nf container">
-    <p class="nf-code px num">404</p>
-    <h1 class="nf-title px">这条路还没修</h1>
-    <p class="nf-desc">地址可能敲错了，或者文章还没写出来。</p>
-    <div class="nf-actions">
-      <a class="btn" href="/">回首页</a>
-      <a class="btn btn--quiet" href="/archive/">看全部文章</a>
+    <div class="nf-text">
+      <p class="nf-code px num">404</p>
+      <h1 class="nf-title px">这条路还没修</h1>
+      <p class="nf-desc">地址可能敲错了，或者文章还没写出来。</p>
+      <div class="nf-actions">
+        <a class="btn" href="/">回首页</a>
+        <a class="btn btn--quiet" href="/archive/">看全部文章</a>
+      </div>
     </div>
-    <Walker />
+    <svg class="nf-sign" viewBox="0 0 14 16" shape-rendering="crispEdges" role="img" aria-label="一块像素路牌">
+      <Fragment set:html={sign} />
+    </svg>
   </section>
 </Base>
 
 <style>
   .nf {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: center;
     padding-block: var(--space-3xl) var(--space-xl);
     max-width: 44em;
   }
@@ -29,6 +68,9 @@ import { site } from '@/config';
   .nf-title { font-size: var(--px-36); margin-top: var(--space-sm); }
   .nf-desc { margin-top: var(--space-md); color: var(--color-ink-2); }
   .nf-actions { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-xl); }
-  /* 404 页的旅人放大 1.5 倍，站定的身影更醒目 */
-  .nf :global(.walker), .nf :global(.walker .wf) { width: 54px; height: 63px; }
+  .nf-sign { width: 98px; height: auto; justify-self: end; }
+
+  @media (min-width: 40rem) {
+    .nf { grid-template-columns: minmax(0, 1fr) auto; }
+  }
 </style>

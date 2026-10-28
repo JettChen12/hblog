@@ -1,0 +1,118 @@
+---
+/**
+ * 静态像素山景横幅（无动画）：甜色日轮、点染云、带旗的双层群峰、山径与脚印。
+ * 程序化生成，配色走设计 token，明暗主题自动适配。
+ * 叙事：山径起点的珊瑚脚印是「足下的第一步」，峰顶小旗是千里之外的 target。
+ */
+const W = 96;
+const H = 16;
+
+type Ch = '.' | '1' | '2' | '3' | 'R' | 'I' | 'F' | 'S' | 'A' | 'C' | 'P';
+const FILL: Record<Exclude<Ch, '.'>, string> = {
+  '1': 'var(--color-paper)',
+  '2': 'var(--color-paper-2)',
+  '3': 'var(--color-paper-3)',
+  R: 'var(--color-rule-strong)', // 路基
+  I: 'var(--color-ink)', // 草茎
+  F: 'var(--color-scene-far)', // 远山
+  S: 'var(--color-amber)', // 日轮
+  A: 'var(--color-accent)', // 旗面与脚印
+  C: 'var(--color-scene-cloud)', // 云
+  P: 'var(--color-scene-peak)', // 近山与旗杆
+};
+
+const g: Ch[][] = Array.from({ length: H }, () => Array<Ch>(W).fill('.'));
+// 后画的覆盖先画的：天空 → 天象 → 远山 → 近山 → 地面 → 山径 → 点缀
+const put = (x: number, y: number, c: Ch) => {
+  const cx = Math.round(x);
+  const cy = Math.round(y);
+  if (cx >= 0 && cx < W && cy >= 0 && cy < H) g[cy][cx] = c;
+};
+const band = (y0: number, y1: number, c: Ch) => {
+  for (let y = y0; y <= y1; y++) for (let x = 0; x < W; x++) g[y][x] = c;
+};
+const peak = (ax: number, ay: number, base: number, c: Ch) => {
+  for (let x = ax - (base - ay); x <= ax + (base - ay); x++) {
+    for (let y = ay + Math.abs(x - ax); y <= base; y++) put(x, y, c);
+  }
+};
+
+// 天空三层 + 棋盘抖动缝
+band(0, 3, '1');
+band(4, 7, '2');
+band(8, 9, '3');
+for (let x = 0; x < W; x++) {
+  if ((x + 3) % 2 === 0) put(x, 3, '2');
+  if ((x + 7) % 2 === 0) put(x, 7, '3');
+}
+
+// 云（点染块，压在色带上）
+put(8, 1, 'C'); put(9, 1, 'C'); put(10, 1, 'C'); put(11, 1, 'C'); put(12, 1, 'C');
+put(10, 2, 'C'); put(11, 2, 'C'); put(12, 2, 'C'); put(13, 2, 'C');
+put(46, 5, 'C'); put(47, 5, 'C'); put(48, 5, 'C'); put(49, 5, 'C');
+put(47, 6, 'C'); put(48, 6, 'C');
+put(58, 2, 'C'); put(59, 2, 'C'); put(60, 2, 'C');
+
+// 日轮：6×6 方形去角
+for (let y = 0; y < 6; y++) {
+  for (let x = 0; x < 6; x++) {
+    const corner = (x === 0 || x === 5) && (y === 0 || y === 5);
+    if (!corner) put(72 + x, 1 + y, 'S');
+  }
+}
+
+// 远山（灰调）
+peak(16, 3, 9, 'F');
+peak(40, 6, 9, 'F');
+peak(84, 5, 9, 'F');
+
+// B 峰小旗：旗杆与近山同色，旗面 4×3 珊瑚
+for (let y = 2; y <= 5; y++) put(40, y, 'P');
+for (let y = 2; y <= 4; y++) for (let x = 41; x <= 44; x++) put(x, y, 'A');
+
+// 近山（剪影）
+peak(58, 7, 12, 'P');
+peak(26, 9, 12, 'P');
+
+// 地面：山径路基
+band(12, 13, 'R');
+band(14, 14, '2');
+band(15, 15, 'R');
+// 山径：路基上的浅色虚线
+for (let x = 0; x < W; x++) if (x % 8 < 4) put(x, 12, '1');
+// 脚印：两步珊瑚方点，紧贴山径起点
+put(29, 11, 'A'); put(30, 11, 'A');
+put(33, 11, 'A'); put(34, 11, 'A');
+// 草茎
+put(5, 11, 'I');
+put(66, 11, 'I');
+put(90, 11, 'I');
+
+// 序列化：同行同色合并
+let rects = '';
+for (let y = 0; y < H; y++) {
+  let x = 0;
+  while (x < W) {
+    const c = g[y][x];
+    if (c === '.') { x++; continue; }
+    let run = 1;
+    while (x + run < W && g[y][x + run] === c) run++;
+    rects += `<rect x="${x}" y="${y}" width="${run}" height="1" fill="${FILL[c]}"/>`;
+    x += run;
+  }
+}
+---
+<div class="scene" aria-hidden="true">
+  <svg viewBox={`0 0 ${W} ${H}`} shape-rendering="crispEdges">
+    <Fragment set:html={rects} />
+  </svg>
+</div>
+
+<style>
+  .scene {
+    margin-top: var(--space-xl);
+    border: var(--border-pixel) solid var(--color-ink);
+    line-height: 0;
+  }
+  .scene svg { width: 100%; height: auto; display: block; }
+</style>

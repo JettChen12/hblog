@@ -118,6 +118,55 @@ dialog.search-dialog::backdrop { background: var(--color-overlay); }
 .search-hint { padding: var(--space-lg) var(--space-md); color: var(--color-ink-3); font-size: var(--text-sm); }
 .search-mark { background: var(--color-accent-soft); color: var(--color-accent-text); }
 
+/* —— 像素密度原语 —— */
+/* 标题像素方块标记（游戏菜单层级感） */
+.px-mark { position: relative; padding-left: var(--space-lg); }
+.px-mark::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc(0.5em + 3px);
+  width: 10px;
+  height: 10px;
+  background: var(--color-accent);
+}
+
+/* 标签芯片的像素点前缀 */
+.chip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  background: var(--color-rule-strong);
+  flex-shrink: 0;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  a.chip:hover::before { background: var(--color-accent); }
+}
+
+/* 抖动带（棋盘 dither，分隔与装饰） */
+.dither {
+  height: 6px;
+  background: repeating-conic-gradient(var(--color-rule) 0% 25%, transparent 0% 50%);
+  background-size: 6px 6px;
+}
+
+/* 回到顶部：无 JS 时始终可见且可用（锚链接）；.js 下先藏后显 */
+.scroll-top {
+  position: fixed;
+  right: var(--space-lg);
+  bottom: var(--space-lg);
+  z-index: var(--z-sticky);
+  background: var(--color-paper);
+}
+.js .scroll-top {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+}
+.js .scroll-top.show { opacity: 1; transform: none; pointer-events: auto; }
+
 /* —— 入场揭示（列表 stagger，无 JS 可见，62 号门禁的安全写法） —— */
 .js [data-reveal] {
   opacity: 0; transform: translateY(8px);
@@ -128,14 +177,3 @@ dialog.search-dialog::backdrop { background: var(--color-overlay); }
 @media (prefers-reduced-motion: reduce) {
   .js [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
-
-/* —— 长循环的暂停控制（行路旅人） —— */
-.loop-toggle {
-  min-height: 36px; padding: var(--space-3xs) var(--space-sm);
-  border: var(--border-pixel) solid var(--color-rule-strong); background: var(--color-paper);
-  color: var(--color-ink-2); font-size: var(--px-12); cursor: pointer;
-  transition: transform var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-}
-.loop-toggle:active { transform: scale(0.94); }
-html:not(.js) .loop-toggle { display: none; }
-@media (prefers-reduced-motion: reduce) { .loop-toggle { display: none; } }

@@ -7,7 +7,19 @@ import '@/styles/ui.css';
 import '@/styles/prose.css';
 import Nav from '@/components/Nav.astro';
 import Footer from '@/components/Footer.astro';
+import PixelIcon from '@/components/PixelIcon.astro';
 import { site } from '@/config';
+
+const UP = [
+  '...KK...',
+  '..KKKK..',
+  '.KKKKKK.',
+  'KKKKKKKK',
+  '...KK...',
+  '...KK...',
+  '...KK...',
+  '...KK...',
+];
 
 interface Props {
   title: string;
@@ -59,5 +71,21 @@ const ogImage = new URL('/og.png', site.url).href;
       <slot />
     </main>
     <Footer />
+    <a class="icon-btn scroll-top" href="#main" aria-label="回到顶部">
+      <PixelIcon m={UP} size={16} />
+    </a>
+    <script>
+      const topBtn = document.querySelector<HTMLAnchorElement>('.scroll-top');
+      if (topBtn) {
+        const sync = () => topBtn.classList.toggle('show', window.scrollY > 600);
+        window.addEventListener('scroll', sync, { passive: true });
+        sync();
+        topBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        });
+      }
+    </script>
   </body>
 </html>

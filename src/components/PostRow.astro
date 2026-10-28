@@ -43,13 +43,29 @@ const { post, compact = false } = Astro.props;
     white-space: nowrap;
   }
   .post-row-title { font-size: var(--px-24); line-height: 1.4; }
+  .post-row-main { position: relative; min-width: 0; }
   .post-row-title a {
     color: var(--color-ink);
     text-decoration: none;
     transition: color var(--dur-micro) var(--ease-out);
   }
+  /* 悬停出现的选择光标（游戏菜单式），绝对定位避免布局位移 */
+  .post-row-main::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--space-lg));
+    top: calc(var(--space-2xs) + 8px);
+    width: 8px;
+    height: 8px;
+    background: var(--color-accent);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+  }
   @media (hover: hover) and (pointer: fine) {
-    .post-row-title a:hover { color: var(--color-accent-text); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.22em; }
+    .post-row:hover .post-row-title a { color: var(--color-accent-text); }
+    .post-row:hover .post-row-main::before,
+    .post-row:focus-within .post-row-main::before { opacity: 1; transform: none; }
   }
   .post-row-title a:focus-visible { outline-offset: 4px; }
   .post-row-desc {
