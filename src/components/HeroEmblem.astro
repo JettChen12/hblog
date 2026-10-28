@@ -1,23 +1,23 @@
 ---
 /**
- * 像素星徽（静态）：hero 右侧的站点纹章，一条完整的视觉故事线——
- * 轨道从带环行星的顶缘升起，火箭沿轨道切线爬升（尾焰落在轨道线上），
- * 终点是带太阳能板的卫星。行星分层明暗：贴边高光新月/条带/宽幅抖动明暗界线/下缘暖色反光。
- * 程序化生成，配色走 token，明暗主题自动适配。
+ * 像素太阳系（静态）：hero 右侧的站点纹章——
+ * 太阳贴在右缘，涟漪状同心轨道环向左层层扩大（内圈实线、外圈棋盘虚线渐淡），
+ * 几枚小像素行星落在各自的轨道上。程序化生成（中点画圆），配色走 token，
+ * 明暗主题自动适配，受光方向全站统一朝左上。
  */
-type Ch = '.' | 'B' | 'H' | 'S' | 'R' | 'A' | 'M' | 'W' | 'P';
+type Ch = '.' | 'R' | 'L' | 'B' | 'P' | 'A' | 'M' | 'H' | 'S';
 const FILL: Record<Exclude<Ch, '.'>, string> = {
+  R: 'var(--color-rule-strong)', // 内圈实线轨道
+  L: 'var(--color-rule)', // 外圈虚线轨道（渐淡）
   B: 'var(--color-ink-2)', // 行星主体
-  H: 'var(--color-emblem-light)', // 高光新月 / 卫星亮面（跨主题恒亮）
-  S: 'var(--color-emblem-dark)', // 暗面 / 细节（跨主题恒暗）
-  R: 'var(--color-rule-strong)', // 条带 / 轨道 / 尾迹 / 板面
-  A: 'var(--color-accent)', // 火箭鼻锥 / 火焰 / 星尘
-  M: 'var(--color-emblem-amber)', // 行星环 / 舷窗 / 暖色反光（浅底加深的琥珀）
-  W: 'var(--color-emblem-light)', // 火箭机身（跨主题恒亮）
-  P: 'var(--color-ink-3)', // 卫星
+  P: 'var(--color-ink-3)', // 远行星
+  A: 'var(--color-accent)', // 太阳边缘 / 远轨珊瑚小行星
+  M: 'var(--color-emblem-amber)', // 太阳核心 / 琥珀气态行星
+  H: 'var(--color-emblem-light)', // 高光 / 冰行星白芯
+  S: 'var(--color-emblem-dark)', // 行星暗面 / 冰行星描边
 };
 
-const W = 32;
+const W = 44;
 const H = 40;
 const g: Ch[][] = Array.from({ length: H }, () => Array<Ch>(W).fill('.'));
 const put = (x: number, y: number, c: Ch) => {
@@ -26,81 +26,61 @@ const put = (x: number, y: number, c: Ch) => {
   if (cx >= 0 && cx < W && cy >= 0 && cy < H) g[cy][cx] = c;
 };
 
-// —— 行星环（后半，先画；行星随后盖住中段）——
-for (let x = 1; x <= 22; x++) put(x, 26, 'M');
+const CX = 40; // 太阳（涟漪圆心）贴近右缘，环向左扩大
+const CY = 20;
 
-// —— 行星：圆 r=7，圆心 (10, 28)，沉在左下 ——
-const CX = 10;
-const CY = 28;
-const R = 7;
-for (let dy = -R; dy <= R; dy++) {
-  const half = Math.round(Math.sqrt(R * R - dy * dy));
-  for (let dx = -half; dx <= half; dx++) {
-    const px = CX + dx;
-    const py = CY + dy;
-    const d = Math.hypot(dx, dy);
-    let c: Ch = 'B';
-    if (dy === -3 || dy === -2 || dy === 2) c = 'R'; // 条带
-    const s = dx + dy; // 光照方向：左上亮、右下暗
-    if (s >= 9) c = 'S'; // 暗面
-    else if (s >= 5 && (px + py) % 2 === 0) c = 'S'; // 宽幅抖动明暗界线
-    if (d >= R - 1.5 && s <= -4) c = 'H'; // 贴边高光新月
-    if (d >= R - 1.5 && s >= 3 && (px + py) % 2 === 1) c = 'M'; // 下缘暖色环境反光
-    put(px, py, c);
+// —— 涟漪轨道环：中点画圆；内实外虚，颜色向外降档渐淡 ——
+const RINGS: { r: number; c: Ch; dotted: boolean }[] = [
+  { r: 6, c: 'R', dotted: false },
+  { r: 11, c: 'R', dotted: false },
+  { r: 16, c: 'R', dotted: true },
+  { r: 21, c: 'L', dotted: true },
+  { r: 26, c: 'L', dotted: true },
+];
+for (const { r, c, dotted } of RINGS) {
+  let x = r;
+  let y = 0;
+  let err = 0;
+  while (x >= y) {
+    const oct = [
+      [CX + x, CY + y], [CX + y, CY + x], [CX - y, CY + x], [CX - x, CY + y],
+      [CX - x, CY - y], [CX - y, CY - x], [CX + y, CY - x], [CX + x, CY - y],
+    ];
+    for (const [px, py] of oct) {
+      if (dotted && (px + py) % 2 !== 0) continue;
+      put(px, py, c);
+    }
+    y++;
+    err += 1 + 2 * y;
+    if (2 * (err - x) + 1 > 0) {
+      x--;
+      err += 1 - 2 * x;
+    }
   }
 }
-// 环的前半（压在行星下缘），两端加斜向衔接像素连回后环
-for (let x = 3; x <= 17; x++) put(x, 29, 'M');
-put(1, 27, 'M'); put(2, 28, 'M');
-put(18, 28, 'M'); put(19, 27, 'M');
 
-// —— 轨道弧：二次贝塞尔，从行星顶缘升起、扫向右上卫星 ——
-const p0 = [13, 20];
-const pc = [13, 3];
-const p1 = [26, 6];
-const seen = new Set<string>();
-for (let i = 0; i <= 16; i++) {
-  const t = i / 16;
-  const u = 1 - t;
-  const x = Math.round(u * u * p0[0] + 2 * t * u * pc[0] + t * t * p1[0]);
-  const y = Math.round(u * u * p0[1] + 2 * t * u * pc[1] + t * t * p1[1]);
-  const key = `${x},${y}`;
-  if (seen.has(key)) continue;
-  seen.add(key);
-  if (g[y]?.[x] === '.') put(x, y, 'R');
-}
-
-// —— 卫星：r=3 球体（亮面 + 双环形山）+ 两侧太阳能板，坐在轨道终点 ——
-const MX = 26;
-const MY = 6;
+// —— 太阳：琥珀核心 + 珊瑚边缘 + 左上一粒高光（自发光体，不做暗面）——
 for (let dy = -3; dy <= 3; dy++) {
-  const half = Math.round(Math.sqrt(9 - dy * dy));
-  for (let dx = -half; dx <= half; dx++) put(MX + dx, MY + dy, 'P');
+  for (let dx = -3; dx <= 3; dx++) {
+    const d = Math.hypot(dx, dy);
+    if (d <= 3) put(CX + dx, CY + dy, d > 2.3 ? 'A' : 'M');
+  }
 }
-put(MX - 2, MY - 2, 'H'); // 亮面
-put(MX - 1, MY - 2, 'H');
-put(MX, MY + 1, 'S'); // 环形山（单 crater，小尺寸下细节做减法）
-put(22, 5, 'R'); put(22, 6, 'S'); put(22, 7, 'R'); // 左太阳能板（1px 宽，带棚线）
-put(30, 5, 'R'); put(30, 6, 'S'); put(30, 7, 'R'); // 右太阳能板
+put(CX - 1, CY - 1, 'H');
 
-// —— 火箭：沿轨道切线爬升（向上每 3 行右移 1 列的微倾剪影）——
-put(17, 5, 'A'); // 鼻锥
-for (let x = 16; x <= 18; x++) put(x, 6, 'A');
-for (let x = 15; x <= 17; x++) { put(x, 7, 'W'); put(x, 8, 'W'); put(x, 9, 'W'); }
-put(16, 8, 'M'); // 舷窗
-for (let x = 14; x <= 16; x++) { put(x, 10, 'W'); put(x, 11, 'W'); put(x, 12, 'W'); }
-put(15, 11, 'M'); // 舷窗
-for (let x = 13; x <= 15; x++) put(x, 13, 'W'); // 基座
-put(12, 12, 'S'); put(12, 13, 'S'); // 左尾翼
-put(17, 12, 'S'); put(17, 13, 'S'); // 右尾翼
-put(13, 14, 'A'); put(12, 15, 'A'); put(11, 16, 'A'); // 火焰（沿切线反向）
-put(10, 18, 'R'); put(9, 20, 'R'); // 点状尾迹
-
-// —— 星尘（收敛到三粒，其余交给全站星空）——
-put(4, 10, 'A'); put(5, 10, 'A');
-put(8, 2, 'M');
-put(29, 33, 'A');
-put(25, 37, 'M');
+// —— 行星：落在各自轨道上，高光统一朝左上 ——
+const disc = (cx: number, cy: number, r: number, c: Ch) => {
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy <= r * r + 0.5) put(cx + dx, cy + dy, c);
+    }
+  }
+};
+disc(31, 14, 2, 'M'); put(30, 13, 'H'); put(32, 15, 'S'); // 近轨琥珀气态行星（白高光+暗面）
+for (let dy = -1; dy <= 1; dy++) {
+  for (let dx = -1; dx <= 1; dx++) put(21 + dx, 29 + dy, dx === 0 && dy === 0 ? 'H' : 'S'); // 中轨冰行星：白芯+深描边，浅底不融背景
+}
+disc(15, 13, 1, 'A'); // 远轨珊瑚小行星
 
 // 序列化：同行同色合并
 let rects = '';
@@ -123,6 +103,6 @@ for (let y = 0; y < H; y++) {
 </div>
 
 <style>
-  .emblem { width: min(232px, 46vw); line-height: 0; }
+  .emblem { width: min(256px, 48vw); line-height: 0; }
   .emblem svg { width: 100%; height: auto; display: block; }
 </style>

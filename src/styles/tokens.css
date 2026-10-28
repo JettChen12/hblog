@@ -1,5 +1,5 @@
 /* Hallmark · shape: Waypoint(行路) · genre: editorial · theme: custom · job: read (the latest post) · idea: "一台行路者的像素终端，文章是路上的里程碑，一个像素旅人替站训走下去" · vibe: "克制复古，深墨珊瑚，像素旅人"
- * paper: oklch(21% 0.032 273) / oklch(95.5% 0.012 265) · accent: oklch(75% 0.135 50) / oklch(72% 0.145 49) · display: Fusion Pixel 12px · body: system CJK stack · hero: 字标与站训居左、硬偏移投影，右侧像素星徽（行星/卫星/火箭），全站铺静态星空 · nav: 单行粘顶，方块字标居左 · footer: 桅杆式，抖动带收顶，字标加链接加版权行 · imagery: none(类型与像素几何承载) · signature: 像素星徽与全站静态星空：H-BLOG 是一艘航行中的星舰，文章即航行日志
+ * paper: oklch(21% 0.032 273) / oklch(95.5% 0.012 265) · accent: oklch(75% 0.135 50) / oklch(72% 0.145 49) · display: Fusion Pixel 12px · body: system CJK stack · hero: 字标与站训居左、硬偏移投影，右侧像素太阳系（太阳贴右缘，涟漪轨道环向左扩大，行星在轨），全站铺静态星空 · nav: 单行粘顶，方块字标居左 · footer: 桅杆式，抖动带收顶，字标加链接加版权行 · imagery: none(类型与像素几何承载) · signature: 像素太阳系涟漪与全站静态星空：H-BLOG 是一艘航行中的星舰，文章即航行日志
  * axes: dark/pixel-mono/warm-coral · posture: Restrained · contrast: pass(数值核验，正文≥4.5:1，双模式) · fold: pass(1280x800 首屏含字标、站训、主行动与星徽) · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V5 · weakest: R, 砍掉 CRT 扫描线与视差念头 · v1.2 站长定案移除行走动画 · v1.3 站长定案移除山水横幅，转向像素星海：分层明暗的带环行星 + 静态星空，密度靠层次不靠平涂 */
 /* Hallmark · waive 47b · real code blocks, not mock chrome: no traffic lights, no URL bar, a pre plus a copy button holding the blog's own article code · 技术博客的代码块是真实材料
