@@ -1,52 +1,57 @@
 ---
 import Base from '@/layouts/Base.astro';
-import { site } from '@/config';
 
-/** 像素路牌（静态）：这条路还没修 */
-const SIGN: Record<string, string> = {
-  I: 'var(--color-ink)',
-  P: 'var(--color-paper)',
-  A: 'var(--color-accent)',
-  R: 'var(--color-rule-strong)',
+/** 漂浮的像素宇航员（静态）：这片星域还没点亮 */
+const C: Record<string, string> = {
+  W: 'var(--color-paper)', // 宇航服
+  S: 'var(--color-ink)', // 面罩/细节
+  R: 'var(--color-rule-strong)', // 背包
+  A: 'var(--color-accent)', // 胸前指示灯
+  M: 'var(--color-amber)', // 面罩反光
 };
 const M = [
-  '......I......',
-  '......I......',
-  '.IIIIIIIIII..',
-  '.IPPPPPPPPI..',
-  '.IPPPAPPPPI..',
-  '.IIIIIIIIII..',
-  '......I......',
-  '......I......',
-  '......I......',
-  '......I......',
-  '......I......',
-  '......I......',
-  '.....III.....',
-  '....IIIII....',
-  '.R...IIIII.R.',
-  '..R.......R..',
+  '.....WWWW.....',
+  '....WWWWWW....',
+  '...WWWWWWWW...',
+  '...WWSSSSWW...',
+  '...WSSMMSSW...',
+  '...WSSSSSSW...',
+  '...WWSSSSWW...',
+  '....WWWWWW....',
+  '..RWWWWWWWW...',
+  '.RRWWAAWWWW...',
+  '.RRWWWWWWWW...',
+  '..RWWWWWWW....',
+  '...WWWWWW.....',
+  '...WW..WW.....',
+  '...WW..WW.....',
+  '..SSS..SSS....',
 ];
-let sign = '';
+let astro2 = '';
 M.forEach((row, y) => {
   [...row].forEach((ch, x) => {
-    if (SIGN[ch]) sign += `<rect x="${x}" y="${y}" width="1" height="1" fill="${SIGN[ch]}"/>`;
+    if (C[ch]) astro2 += `<rect x="${x}" y="${y}" width="1" height="1" fill="${C[ch]}"/>`;
   });
 });
+// 安全绳：点状虚线斜向远方
+let tether = '';
+for (let i = 0; i < 5; i++) {
+  tether += `<rect x="${13 + i}" y="${1 + i * 2}" width="1" height="1" fill="var(--color-rule-strong)"/>`;
+}
 ---
 <Base title="404" description="这一页不存在。">
   <section class="nf container">
     <div class="nf-text">
       <p class="nf-code px num">404</p>
-      <h1 class="nf-title px">这条路还没修</h1>
-      <p class="nf-desc">地址可能敲错了，或者文章还没写出来。</p>
+      <h1 class="nf-title px">这片星域还没点亮</h1>
+      <p class="nf-desc">地址可能敲错了，或者日志还没写到这里。</p>
       <div class="nf-actions">
         <a class="btn" href="/">回首页</a>
         <a class="btn btn--quiet" href="/archive/">看全部文章</a>
       </div>
     </div>
-    <svg class="nf-sign" viewBox="0 0 14 16" shape-rendering="crispEdges" role="img" aria-label="一块像素路牌">
-      <Fragment set:html={sign} />
+    <svg class="nf-astro" viewBox="0 0 18 16" shape-rendering="crispEdges" role="img" aria-label="一位漂浮在星海中的像素宇航员">
+      <Fragment set:html={tether + astro2} />
     </svg>
   </section>
 </Base>
@@ -68,7 +73,12 @@ M.forEach((row, y) => {
   .nf-title { font-size: var(--px-36); margin-top: var(--space-sm); }
   .nf-desc { margin-top: var(--space-md); color: var(--color-ink-2); }
   .nf-actions { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-xl); }
-  .nf-sign { width: 98px; height: auto; justify-self: end; }
+  .nf-astro {
+    width: 128px;
+    height: auto;
+    justify-self: end;
+    rotate: -8deg; /* 漂浮的失重感（静态旋转，非动画） */
+  }
 
   @media (min-width: 40rem) {
     .nf { grid-template-columns: minmax(0, 1fr) auto; }
